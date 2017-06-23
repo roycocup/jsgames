@@ -114,6 +114,7 @@ function Rocket(){
     this.acc.add(force);
   }
 
+  // this is not going ok. Check after 18:15
   this.calcPerformance = function(){
     this.performance = 1 / dist(this.pos.x, this.pos.y, _target.x, _target.y);
   }
