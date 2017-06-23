@@ -1,3 +1,5 @@
+//Game based on https://www.youtube.com/watch?v=bGz7mv2vD6g
+
 var _population;
 var _lifeSpan = 200;
 var _frame = 0;
@@ -31,13 +33,15 @@ function frameCounter(){
 }
 
 function Target(){
+  this.x = width/2;
+  this.y = 50;
 
   this.draw = function(){
     push();
     fill("red");
-    ellipse(width/2, 50, 20);
+    ellipse(this.x, this.y, 20);
     fill("white");
-    ellipse(width/2, 50, 10);
+    ellipse(this.x, this.y, 10);
     pop();
   }
 }
@@ -45,15 +49,28 @@ function Target(){
 function Population(){
   this.numRockets = 10;
   this.rockets = [];
+  this.bestPerformer = width * height;
 
   for(var i=0; i<this.numRockets; i++){
     this.rockets.push(new Rocket());
   }
+
   this.update = function(){
     this.rockets.map(function(r){
       r.update();
       r.draw();
     });
+
+    if(_frame == _lifeSpan){
+      for (var i = 0; i < this.rockets.length; i++) {
+        this.rockets[i].calcPerformance();
+        if(this.rockets[i].performance < this.bestPerformer){
+          this.bestPerformer = this.rockets[i].performance;
+        }
+      }
+      //console.log(this.bestPerformer);
+    }
+
   }
 }
 
@@ -71,6 +88,7 @@ function Rocket(){
   this.vel = createVector(); // mps
   this.acc = createVector(); // mps/s
   this.dna = new DNA();
+  this.performance = -1;
 
   this.update = function(){
     if (_frame % 10){
@@ -82,10 +100,6 @@ function Rocket(){
     this.acc.mult(0); // clear the accelaration
   }
 
-  this.applyForce = function (force){
-    this.acc.add(force);
-  }
-
   this.draw = function(){
     push(); // stop it from affecting other elements on canvas
     noStroke();
@@ -95,6 +109,15 @@ function Rocket(){
     rect(0,0, this.width, this.height);
     pop(); // stop it from affecting other elements on canvas
   }
+
+  this.applyForce = function (force){
+    this.acc.add(force);
+  }
+
+  this.calcPerformance = function(){
+    this.performance = 1 / dist(this.pos.x, this.pos.y, _target.x, _target.y);
+  }
+
 }
 
 function debug(s){
